@@ -1,5 +1,5 @@
 # Age and sex differences in the vertebral column of the false killer whale (*Pseudorca crassidens*) 🐬🦴📈
-### Testing changes to vertebrae shape and size during growth and between sexes in a popualtion stranded false killer whales using 3D geometric morphometrics 
+### Testing changes to vertebrae shape and size during growth and between sexes in a population of stranded false killer whales using 3D geometric morphometrics 
 
 Authors: [Mélissa Duflot](mailto:melissa.duflot.21@alumni.ucl.ac.uk?subject=[GitHub]%20Pseudorca%20Vertebrae%20Paper%20Code), Amadine Gillet,
 Katrina Jones, Richard Sabin, [Agnese Lanzetti](mailto:agnese.lanzetti@gmail.com?subject=[GitHub]%20Pseudorca%20Vertebrae%20Paper%20Code)
