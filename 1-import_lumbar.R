@@ -32,10 +32,7 @@ LM_lumbar_table <-  read_csv("Data/landmark_lumbar.csv")
 #Import table defining curves
 curve_lumbar_table <- read_csv("Data/curves_lumbar.csv")
 
-#curve_table$bone[11:12] <- "premaxilla" to change bone group if needed for plots
-
 #Identify the folder where your pts files are (I have a different one for each vertebral type)
-
 ptsfolder_lumbar <- "Data/pts/lumbar_pts"
 
 #Import the pts file names
@@ -58,11 +55,11 @@ plylist8<-gsub(pattern="\\.ply$","",plylist_lumbar)
 #Check that names match up
 identical(plylist8,ptslist8) #should be TRUE if order the same
 
+#Write file with list of specimens/vertebrae
+write.csv(plylist8, file = "Output/lumbar.csv")
+
 #Set wd where the checkpoint data is
 setwd(ptsfolder_lumbar)
-
-#Write file with list of specimens/vertebrae
-write.csv(plylist8, file = "lumbar.csv")
 
 ###RESAMPLE AND FIX MISSING DATA ----
 
@@ -75,7 +72,7 @@ subsampled.lm_lumbar <- import_chkpt_data(ptslist_lumbar, my_curves_lumbar, subs
 subsampled.lm_lumbar[subsampled.lm_lumbar == 9999] <- NA
 
 
-###SET WD to ply from console!! -->
+###SET WD to lumbar_ply from console!! -->
 
 #Make sure you have converted your plys from binary to ASCII
 #Check to make sure your curves look okay on each specimen
@@ -86,12 +83,10 @@ specs_tofix2lumbar <- checkLM(subsampled.lm_lumbar, path="", pt.size = 4, suffix
 #Write down specs numbers as you will need to clean evironment to import them again
 
 #Check single specimen problems with spheres
-checkLM(subsampled.lm_lumbar, path="", pt.size = 1, suffix=".ply", render = "s", begin = 152, point = "s")
-
+checkLM(subsampled.lm_lumbar, path="", pt.size = 1, suffix=".ply", render = "s", begin = 1, point = "s")
 
 #Create object with new resampled points
 newpts_lumbar <- subsampled.lm_lumbar
-
 
 #Create missing list 
 misslist_lumbar <- createMissingList(dim(newpts_lumbar)[3])
@@ -100,11 +95,10 @@ for (j in 1:dim(newpts_lumbar)[[3]]){
   misslist_lumbar[[j]]<-which(is.na(newpts_lumbar[,1,j]))
 } 
 
-
 ##Fix missing landmarks
 newpts2_lumbar <- fixLMtps(newpts_lumbar)
 
-checkLM(newpts2_lumbar$out, path="", pt.size = 1, suffix=".ply", render="s", begin = 152)
+checkLM(newpts2_lumbar$out, path="", pt.size = 1, suffix=".ply", render="s", begin = 1)
 
 
 #SLIDE ----
@@ -140,12 +134,16 @@ slid.lms_lumbar <- fixLMtps(slided4.all_lumbar$dataslide)
 #Extract landmark array from object
 slidedlms_lumbar <- slid.lms_lumbar$out
 
+plotOutliers(slidedlms_lumbar)
+
 #Check to see how they look (plys must be ASCII format)
 specs_tofix_slid_lumbar <- checkLM(slidedlms_lumbar, path="", pt.size = 5, 
-                                     suffix=".ply", render = "s", begin = 152, point = "s")
+                                     suffix=".ply", render = "s", begin = 1, point = "s")
+
+##CHANGE WD to source folder in console --->
 
 #Save slided LMs as R data file
-save(slidedlms_lumbar, file = 'slidedlms_lumbar.Rdata')
+save(slidedlms_lumbar, file = 'Output/slidedlms_lumbar.Rdata')
 
 #List of points and curves for different bones - useful for plots
 centrum_lumbar <- c(LM_lumbar_table$lm[which(LM_lumbar_table$bone%in%c("centra"))], 

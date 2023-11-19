@@ -34,7 +34,6 @@ curve_thoracic_table <- read_csv("Data/curves_thoracic.csv")
 #curve_table$bone[11:12] <- "premaxilla" to change bone group if needed for plots
 
 #Identify the folder where your pts files are (I have a different one for each vertebral type)
-
 ptsfolder_thoracic <- "Data/pts/thoracic_pts"
 
 #Import the pts file names
@@ -57,6 +56,9 @@ plylist2<-gsub(pattern="\\.ply$","",plylist_thoracic)
 #Check that names match up
 identical(plylist2,ptslist2) #should be TRUE if order the same
 
+#Write file with list of specimens/vertebrae
+write.csv(plylist2, file = "Output/thoracic.csv")
+
 #Set wd where the checkpoint data is
 setwd(ptsfolder_thoracic)
 
@@ -70,10 +72,7 @@ subsampled.lm_thoracic <- import_chkpt_data(ptslist_thoracic, my_curves_thoracic
 
 subsampled.lm_thoracic[subsampled.lm_thoracic == 9999] <- NA
 
-#Write file with list of specimens/vertebrae
-write.csv(plylist2, file = "thoracic.csv")
-
-###SET WD to ply from console!! -->
+###SET WD to thoracic_ply from console!! -->
 
 #Make sure you have converted your plys from binary to ASCII
 #Check to make sure your curves look okay on each specimen
@@ -84,7 +83,7 @@ specs_tofix2thoracic <- checkLM(subsampled.lm_thoracic, path="", pt.size = 4, su
 #Write down specs numbers as you will need to clean evironment to import them again
 
 #Check single specimen problems with spheres
-checkLM(subsampled.lm_thoracic, path="", pt.size = 1, suffix=".ply", render = "s", begin = 104, point = "s")
+checkLM(subsampled.lm_thoracic, path="", pt.size = 1, suffix=".ply", render = "s", begin = 1, point = "s")
 
 #Create object with new resampled points
 newpts_thoracic <- subsampled.lm_thoracic
@@ -96,12 +95,10 @@ for (j in 1:dim(newpts_thoracic)[[3]]){
   misslist_thoracic[[j]]<-which(is.na(newpts_thoracic[,1,j]))
 } 
 
-
 ##Fix missing landmarks
 newpts2_thoracic <- fixLMtps(newpts_thoracic)
 
-checkLM(newpts2_thoracic$out, path="", pt.size = 1, suffix=".ply", render="s", begin = 104)
-
+checkLM(newpts2_thoracic$out, path="", pt.size = 1, suffix=".ply", render="s", begin = 1)
 
 #SLIDE ----
 
@@ -138,10 +135,18 @@ slidedlms_thoracic <- slid.lms_thoracic$out
 
 #Check to see how they look (plys must be ASCII format)
 specs_tofix_slid_thoracic <- checkLM(slidedlms_thoracic, path="", pt.size = 5, 
-                            suffix=".ply", render = "s", begin = 104, point = "s")
+                            suffix=".ply", render = "s", begin = 1, point = "s")
+
+##CHANGE WD to source folder in console --->
 
 #Save slided LMs as R data file
-save(slidedlms_thoracic, file = 'slidedlms_thoracic.Rdata')
+save(slidedlms_thoracic, file = 'Output/slidedlms_thoracic.Rdata')
+
+#List of points and curves for different bones - useful for plots
+centrum_thoracic <- c(LM_thoracic_table$lm[which(LM_thoracic_table$bone%in%c("centra"))], 
+                      my_curves_thoracic$Curves[which(curve_thoracic_table$bone%in%c("centra"))]) %>% unlist(.)%>%unique(.)%>%sort(.)
+process_thoracic <- c(LM_thoracic_table$lm[which(LM_thoracic_table$bone%in%c("process"))], 
+                      my_curves_thoracic$Curves[which(curve_thoracic_table$bone%in%c("process"))]) %>% unlist(.)%>%unique(.)%>%sort(.)
 
 #MIRROR SYMMETRICAL TRAITS ---- 
 
@@ -183,11 +188,6 @@ dimnames(mirrored_thoracic)[3] <- dimnames(slidedlms_thoracic)[3]
 #Create new object for analyses with all mirrored data, include only shape data
 final_dataset_thoracic <- mirrored_thoracic
 
-#List of points and curves for different bones - useful for plots
-centrum_thoracic <- c(LM_thoracic_table$lm[which(LM_thoracic_table$bone%in%c("centra"))], 
-                      my_curves_thoracic$Curves[which(curve_thoracic_table$bone%in%c("centra"))]) %>% unlist(.)%>%unique(.)%>%sort(.)
-process_thoracic <- c(LM_thoracic_table$lm[which(LM_thoracic_table$bone%in%c("process"))], 
-                      my_curves_thoracic$Curves[which(curve_thoracic_table$bone%in%c("process"))]) %>% unlist(.)%>%unique(.)%>%sort(.)
 
 
 

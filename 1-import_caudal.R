@@ -32,10 +32,7 @@ LM_caudal_table <-  read_csv("Data/landmark_caudal.csv")
 #Import table defining curves
 curve_caudal_table <- read_csv("Data/curves_caudal.csv")
 
-#curve_table$bone[11:12] <- "premaxilla" to change bone group if needed for plots
-
 #Identify the folder where your pts files are (I have a different one for each vertebral type)
-
 ptsfolder_caudal <- "Data/pts/caudal_pts"
 
 #Import the pts file names
@@ -58,11 +55,12 @@ plylist11<-gsub(pattern="\\.ply$","",plylist_caudal)
 #Check that names match up
 identical(plylist11,ptslist11) #should be TRUE if order the same
 
+#Write file with list of specimens/vertebrae
+write.csv(plylist11, file = "Output/caudal.csv")
+
 #Set wd where the checkpoint data is
 setwd(ptsfolder_caudal)
 
-#Write file with list of specimens/vertebrae
-write.csv(plylist9, file = "caudal.csv")
 
 ###RESAMPLE AND FIX MISSING DATA ----
 
@@ -75,7 +73,7 @@ subsampled.lm_caudal <- import_chkpt_data(ptslist_caudal, my_curves_caudal, subs
 subsampled.lm_caudal[subsampled.lm_caudal == 9999] <- NA
 
 
-###SET WD to ply from console!! -->
+###SET WD to caudal_ply from console!! -->
 
 #Make sure you have converted your plys from binary to ASCII
 #Check to make sure your curves look okay on each specimen
@@ -86,7 +84,7 @@ specs_tofix2caudal <- checkLM(subsampled.lm_caudal, path="", pt.size = 4, suffix
 #Write down specs numbers as you will need to clean evironment to import them again
 
 #Check single specimen problems with spheres
-checkLM(subsampled.lm_caudal, path="", pt.size = 1, suffix=".ply", render = "s", begin = 177, point = "s")
+checkLM(subsampled.lm_caudal, path="", pt.size = 1, suffix=".ply", render = "s", begin = 1, point = "s")
 
 #Create object with new resampled points
 newpts_caudal <- subsampled.lm_caudal
@@ -102,7 +100,7 @@ for (j in 1:dim(newpts_caudal)[[3]]){
 ##Fix missing landmarks
 newpts2_caudal <- fixLMtps(newpts_caudal)
 
-checkLM(newpts2_caudal$out, path="", pt.size = 1, suffix=".ply", render="s", begin = 177)
+checkLM(newpts2_caudal$out, path="", pt.size = 1, suffix=".ply", render="s", begin = 1)
 
 
 #SLIDE ----
@@ -142,10 +140,12 @@ plotOutliers(slidedlms_caudal)
 
 #Check to see how they look (plys must be ASCII format)
 specs_tofix_slid_caudal <- checkLM(slidedlms_caudal, path="", pt.size = 5, 
-                                     suffix=".ply", render = "s", begin = 104, point = "s")
+                                     suffix=".ply", render = "s", begin = 1, point = "s")
+
+##CHANGE WD to source folder in console --->
 
 #Save slided LMs as R data file
-save(slidedlms_caudal, file = 'slidedlms_caudal.Rdata')
+save(slidedlms_caudal, file = 'Output/slidedlms_caudal.Rdata')
 
 #List of points and curves for different bones - useful for plots
 centrum_caudal <- c(LM_caudal_table$lm[which(LM_caudal_table$bone%in%c("centra"))], 
