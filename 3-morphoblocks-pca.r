@@ -27,16 +27,13 @@ library(morphoBlocks)
 
 #Add column with vertebra type, pc scores and raw coordinates
 gdf_thoracic$vertebra <- as.factor(rep("Thoracic", times = length(gdf_thoracic$Id)))
-gdf_thoracic$
 gdf_thoracic$raw <- final_dataset_thoracic
 
 #do this for each type of vertebra
 gdf_lumbar$vertebra <- as.factor(rep("Lumbar", times = length(gdf_lumbar$Id)))
-
 gdf_lumbar$raw <- final_dataset_lumbar
 
 gdf_caudal$vertebra <- as.factor(rep("Caudal", times = length(gdf_caudal$Id)))
-
 gdf_caudal$raw <- final_dataset_caudal
 
 #Remove extra vertebrae to have 3 per type per specimen
@@ -44,21 +41,21 @@ gdf_caudal$raw <- final_dataset_caudal
 lumbar_delete <-  seq(4, length(gdf_lumbar$specimens), by = 4)
 caudal_delete <- c(seq(4, length(gdf_caudal$specimens), by = 4), seq(5, length(gdf_caudal$specimens), by = 5))
 
-#Raw data with extra vertebrae removed
-raw_thoracic <- final_dataset_thoracic
-raw_lumbar <- final_dataset_lumbar[,,-lumbar_delete]
-raw_caudal <- final_dataset_caudal[,,-caudal_delete]
+#GPA data with extra vertebrae removed
+coords_thoracic_blocks <- gdf_thoracic$coords
+coords_lumbar_blocks <- gdf_lumbar$coords[,,-lumbar_delete]
+coords_caudal_blocks <- gdf_caudal$coords[,,-caudal_delete]
+
+#CS with extra vertebrae removed
+block_thoracic_logCS <- gdf_thoracic$size
+block_lumbar_logCS <- gdf_lumbar$size[-lumbar_delete]
+block_caudal_logCS <- gdf_caudal$size[-caudal_delete]
 
 #MORPHOBLOCKS#
 #Create coordinate blocks
-block_thoracic <- formatBlock(raw_thoracic, k = 3, gpa = TRUE)
-block_lumbar <- formatBlock(raw_lumbar, k = 3, gpa = TRUE)
-block_caudal <- formatBlock(raw_caudal, k = 3, gpa = TRUE)
-
-#Create block logCS
-block_thoracic_logCS <- log(block_thoracic@centroid)
-block_lumbar_logCS <- log(block_lumbar@centroid)
-block_caudal_logCS <- log(block_caudal@centroid)
+block_thoracic <- formatBlock(coords_thoracic_blocks, cs = block_thoracic_logCS, k = 3, gpa = F)
+block_lumbar <- formatBlock(coords_lumbar_blocks, cs = block_lumbar_logCS, k = 3, gpa = F)
+block_caudal <- formatBlock(coords_caudal_blocks, cs = block_caudal_logCS, k = 3, gpa = F)
 
 #Create logCS for consensus shape
 mean_logCS <- data.frame(t = block_thoracic_logCS, l = block_lumbar_logCS, c = block_caudal_logCS)
@@ -74,6 +71,15 @@ pca_all <- analyseBlocks(blocklist, option = "rcpca", ncomp = 95)
 #Check it worked
 scoresPlot(pca_all)
 par(mfrow=c(1,1))
+
+#Visualize loadings for the first two components
+loadingsPlot(pca_all, comp = 1, cex.3d = 10)
+rgl.snapshot(filename = "Output/loadings_comp1.png")
+clear3d()
+
+loadingsPlot(pca_all, comp = 2, cex.3d = 7)
+rgl.snapshot(filename = "Output/loadings_comp2.png")
+
 
 #Make gdf with all data needed for analysis
 #Make sure each variable is added in the same order (if thoracic first in pca first in all other etc.)
@@ -124,14 +130,14 @@ PC2_all <- mean(pca_all[["result"]][["AVE"]][["AVE_X"]][[1]][["comp2"]], pca_all
 #Plot
 PCA_all_vertebrae_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp1, y = comp2, label = specimens, colour = age, fill = age))+
   geom_point(size = 3, aes(shape = sex))+
-  geom_text_repel(colour = "black", size = 4, max.overlaps = 40)+
+  geom_text_repel(colour = "black", size = 4, max.overlaps = 200)+
   scale_colour_manual(name = "Age", labels =  c("adult"  ,  "juvenile", "newborn" ), #to be ordered as they appear in tibble
-                      values = mypalette_age_sex , aesthetics = c("colour","fill"))+            #legend and color adjustments
+                      values = mypalette_age , aesthetics = c("colour","fill"))+            #legend and color adjustments
   scale_shape_manual(name = "Sex", labels = c( "F"   ,    "M"      , "unknown"), #copy from as.factor(sex)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (28.73%)")+ #copy this from PC1_all object
-  ylab("PC 2 (26.97%)")+ #copy this from PC2_all object
+  xlab(paste0("PC 1 (",round(PC1_all, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_all, digits = 2),"%)"))+ 
   ggtitle("PCA all data vertebrae")+
   theme(plot.title = element_text(face = "bold", hjust = 0.5)) 
 
@@ -145,39 +151,22 @@ hulls_all_age_vertebrae <- pcscores_all_vertebrae %>%
   rename(x = comp1, y = comp2)
 
 
-##############################################
-
-####colours
-# We can create choose a palette based on the R chart as follow:
-mycols_age <- colors()[c(142, 616, 548)] 
-
-
-mycols_age <- colors()[c("#DDCC77", "#6699CC", "#AA4499")] 
-
-############# color blind friendly
-
-mycols_age= carto_pal(12, "Safe")
-mycols_age
-
-
-#Nice PCA plot with hulls around age COLOR BLIND FRIENDLY
-
 PCA_all_vertebrae_age_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp1, y = comp2, colour = age))+
-  geom_point(size = 3, aes(shape = vertebra), fill = "white")+
-  scale_colour_manual(name = "Age", labels =  c("adult" ,   "juvenile" ,"neonate" ), #to be ordered as they appear in tibble
-                      values = c("#F0E442", "#6699CC", "#AA4499"))+            #legend and color adjustments
+  geom_point(size = 3, aes(shape = vertebra, fill = age), color = "black") +
   geom_polygon(data = hulls_all_age_vertebrae, aes(x = x, y = y, colour = age, fill = age), 
-               alpha = .3, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
-  scale_fill_manual(name = "Age", labels = c("adult"  ,  "juvenile", "neonate" ),
-                    values =  c("#F0E442", "#6699CC", "#AA4499") )+ #must match scale_colour_manual
+               alpha = .3, show.legend = FALSE, inherit.aes = FALSE) +
+  scale_colour_manual(name = "Age", labels = c("Adult", "Juvenile", "Neonate"),
+                      values = mypalette_age) +
+  scale_fill_manual(name = "Age", labels = c("Adult", "Juvenile", "Neonate"),
+                    values = mypalette_age) +
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (28.73%)")+ #copy this from PC1_all object
-  ylab("PC 2 (26.97%)")+ #copy this from PC2_all object
- 
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
+  xlab(paste0("PC 1 (",round(PC1_all, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_all, digits = 2),"%)"))+ 
+  guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_age))) +
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+        legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis
 
@@ -193,52 +182,35 @@ hulls_all_sex_vertebrae  <- pcscores_all_vertebrae  %>%
 
 #Nice PCA plot with hulls around sex
 PCA_all_vertebrae_sex_ggplot <- ggplot(pcscores_all_vertebrae[!pcscores_all_vertebrae$sex%in% c("unknown"),], aes(x = comp1, y = comp2, colour = sex))+
-  geom_point(size = 3, aes(shape = vertebra), fill = "white")+
-  scale_colour_manual(name = "Sex", labels =  c("Female"   ,    "Male"      , "Unknown (neonate)"), #to be ordered as they appear in tibble
-                      values = c("#E597B9", "#332288"))+            #legend and color adjustments
+  geom_point(size = 3, aes(shape = vertebra, fill = sex), color = "black") +
   geom_polygon(data = hulls_all_sex_vertebrae[!hulls_all_sex_vertebrae$sex%in% c("unknown"),], aes(x = x, y = y, colour = sex, fill = sex), 
                alpha = .3, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
-  scale_fill_manual(name = "Sex", labels = c( "Female"   ,    "Male"      , "Unknown (neonate)"),
-                    values = c("#E597B9", "#332288"))+ #must match scale_colour_manual
+  scale_colour_manual(name = "Sex", labels =  c("Female"   ,    "Male"), #to be ordered as they appear in tibble
+                      values= mypalette_sex)+            #legend and color adjustments
+  scale_fill_manual(name = "Sex", labels = c( "Female"   ,    "Male"),
+                    values =   mypalette_sex)+ #must match scale_colour_manual
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (28.73%)")+ #copy this from PC1_all object
-  ylab("PC 2 (26.97%)")+ #copy this from PC2_all object
-  theme(plot.title = element_text(face = "bold", hjust = 0.5))+
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
+  xlab(paste0("PC 1 (",round(PC1_all, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_all, digits = 2),"%)"))+ 
+  guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_sex))) +
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+        legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis
 
 #Visualize plot and save as PDF using menu in bar on the right
 PCA_all_vertebrae_sex_ggplot
 
-##################################################
+#Palette for vertebrae
+mypalette_paired <- brewer.pal(12,"Paired")
+image(1:12, 1, as.matrix(1:12), col = mypalette_paired, xlab = "Paired",
+      ylab = "", yaxt = "n")
 
-PCA_all_vertebrae_sex_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp1, y = comp2, colour = sex))+
-  geom_point(size = 3, aes(shape = vertebra), fill = "white")+
-  scale_colour_manual(name = "Sex", labels =  c("Female"   ,    "Male"      , "Unknown (neonate)"), #to be ordered as they appear in tibble
-                      values = c("#E597B9", "#332288", "#44AA99"))+            #legend and color adjustments
-  geom_polygon(data = hulls_all_sex_vertebrae, aes(x = x, y = y, colour = sex, fill = sex), 
-               alpha = .3, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
-  scale_fill_manual(name = "Sex", labels = c( "Female"   ,    "Male"      , "Unknown (neonate)"),
-                    values = c("#E597B9", "#332288", "#44AA99"))+ #must match scale_colour_manual
-  scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
-                     values = shapes)+
-  theme_bw()+
-  xlab("PC 1 (28.73%)")+ #copy this from PC1_all object
-  ylab("PC 2 (26.97%)")+ #copy this from PC2_all object
-  theme(plot.title = element_text(face = "bold", hjust = 0.5))+
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
-
-#scale_y_reverse() #reverse y scale to match traj analysis
-
-#Visualize plot and save as PDF using menu in bar on the right
-PCA_all_vertebrae_sex_ggplot
-
-############################################################################################
+mypalette_vertebrae <- c(mypalette_paired[3], mypalette_paired[8], mypalette_paired[9])
+image(1:3, 1, as.matrix(1:3), col = mypalette_vertebrae,
+      ylab = "", yaxt = "n")
 
 #Make hulls for PCA plot with hulls around vertebra type
 hulls_all_vertebra_vertebrae  <- pcscores_all_vertebrae  %>%
@@ -248,53 +220,26 @@ hulls_all_vertebra_vertebrae  <- pcscores_all_vertebrae  %>%
 
 #Nice PCA plot with hulls around vertebra
 PCA_all_vertebrae_vertebra_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp1, y = comp2, colour = vertebra))+
-  geom_point(size = 3, aes(shape = age), fill = "white")+
-  scale_colour_manual(name = "Vertebra", labels =  c("Thoracic","Lumbar", "Caudal"), #to be ordered as they appear in tibble
-                      values = mypalette_age_sex )+            #legend and color adjustments
+  geom_point(size = 3, aes(shape = age, fill = vertebra), color = "black")+
   geom_polygon(data = hulls_all_vertebra_vertebrae, aes(x = x, y = y, colour = vertebra, fill = vertebra), 
                alpha = .3, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
   scale_fill_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"),
-                    values =  mypalette_age_sex)+ #must match scale_colour_manual
-  scale_shape_manual(name = "Age", labels = c( "adult"  ,  "juvenile", "newborn"), #copy from as.factor(age)
+                    values =  mypalette_vertebrae)+ #must match scale_colour_manual
+  scale_colour_manual(name = "Vertebra", labels =  c("Thoracic","Lumbar", "Caudal"), #to be ordered as they appear in tibble
+                      values = mypalette_vertebrae)+            #legend and color adjustments
+  scale_shape_manual(name = "Age", labels = c( "Adult"  ,  "Juvenile", "Newborn"), #copy from as.factor(age)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (28.73%)")+ #copy this from PC1_all object
-  ylab("PC 2 (26.97%)")+ #copy this from PC2_all object
-  ggtitle("PCA all data vertebrae")+
-  theme(plot.title = element_text(face = "bold", hjust = 0.5))+
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
+  xlab(paste0("PC 1 (",round(PC1_all, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_all, digits = 2),"%)"))+ 
+  guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_vertebrae))) +
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+        legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis
 
 #Visualize plot and save as PDF using menu in bar on the right
 PCA_all_vertebrae_vertebra_ggplot
-
-#Make hulls for PCA plot with hulls around specimen
-hulls_all_specimen_vertebrae  <- pcscores_all_vertebrae  %>%
-  group_by(specimens) %>%
-  slice(chull(comp1, comp2)) %>%
-  rename(x = comp1, y = comp2)
-
-#Nice PCA plot with hulls around sex
-PCA_all_vertebrae_specimen_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp1, y = comp2, colour = specimens))+
-  geom_point(size = 3, aes(shape = vertebra), fill = "white")+
-  geom_polygon(data = hulls_all_specimen_vertebrae, aes(x = x, y = y, colour = specimens, fill = specimens), 
-               alpha = .1, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
-  scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
-                     values = shapes)+
-  theme_bw()+
-  xlab("PC 1 (28.73%)")+ #copy this from PC1_all object
-  ylab("PC 2 (26.97%)")+ #copy this from PC2_all object
-  ggtitle("PCA all data vertebrae")+
-  theme(plot.title = element_text(face = "bold", hjust = 0.5))+
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
-
-#scale_y_reverse() #reverse y scale to match traj analysis
-
-#Visualize plot and save as PDF using menu in bar on the right
-PCA_all_vertebrae_specimen_ggplot
 
 ###Regression PC1 and PC2 ----
 
@@ -309,7 +254,7 @@ anova(reg_PC1all_vertebrae_size)
 anova(reg_PC2all_vertebrae_size)
 
 #Save results of significant regression to file
-sink("output/PC1-2all_vertebrae_size_lm.txt")
+sink("Output/PC1-2all_vertebrae_size_lm.txt")
 print("PC1")
 summary(reg_PC1all_vertebrae_size)
 anova(reg_PC1all_vertebrae_size)
@@ -329,7 +274,7 @@ anova(reg_PC1all_vertebrae_sex)
 anova(reg_PC2all_vertebrae_sex)
 
 #Save results of significant regression to file
-sink("output/PC1-2all_vertebrae_sex_lm.txt")
+sink("Output/PC1-2all_vertebrae_sex_lm.txt")
 print("PC1")
 summary(reg_PC1all_vertebrae_sex)
 anova(reg_PC1all_vertebrae_sex)
@@ -349,7 +294,7 @@ anova(reg_PC1all_vertebrae_age)
 anova(reg_PC2all_vertebrae_age)
 
 #Save results of significant regression to file
-sink("output/PC1-2all_vertebrae_age_lm.txt")
+sink("Output/PC1-2all_vertebrae_age_lm.txt")
 print("PC1")
 summary(reg_PC1all_vertebrae_age)
 anova(reg_PC1all_vertebrae_age)
@@ -369,7 +314,7 @@ anova(reg_PC1all_vertebrae_specimens)
 anova(reg_PC2all_vertebrae_specimens)
 
 #Save results of significant regression to file
-sink("output/PC1-2all_vertebrae_specimens_lm.txt")
+sink("Output/PC1-2all_vertebrae_specimens_lm.txt")
 print("PC1")
 summary(reg_PC1all_vertebrae_specimens)
 anova(reg_PC1all_vertebrae_specimens)
@@ -389,7 +334,7 @@ anova(reg_PC1all_vertebrae_vertebra)
 anova(reg_PC2all_vertebrae_vertebra)
 
 #Save results of significant regression to file
-sink("output/PC1-2all_vertebrae_vertebra_lm.txt")
+sink("Output/PC1-2all_vertebrae_vertebra_lm.txt")
 print("PC1")
 summary(reg_PC1all_vertebrae_vertebra)
 anova(reg_PC1all_vertebrae_vertebra)
@@ -399,7 +344,7 @@ anova(reg_PC2all_vertebrae_vertebra)
 sink() 
 
 #Save results of all regressions to 1 file
-sink("output/PC1-2_all_vertebrae_lm.txt")
+sink("Output/PC1-2_all_vertebrae_lm.txt")
 print("PC1")
 anova(reg_PC1all_vertebrae_size)
 anova(reg_PC1all_vertebrae_sex)
@@ -415,14 +360,15 @@ anova(reg_PC2all_vertebrae_vertebra)
 sink()
 
 #ANOVAs OF PC SCORES AND SEX/AGE BY VERTEBRA TYPE AND CONSENSUS ----
-##Vertebra type ----
-#Is there differences vertebra shape between sexes and ages?
+#Is there differences vertebra shape between vertebra type, sexes and ages across the data?
 #Taking into account the shape difference based on column position
 #Shape is expressed as pc scores
 
 #Make unique row names
 rownames(gdf_all$pcscores) <- make.names(gdf_all$specimen, unique = TRUE)
 
+##Shape ----
+###Vertebra type ----
 #Calculate null model - changes in shape based on vertebra type
 shape_vert_null <- lm.rrpp(pcscores ~ vertebra, data = gdf_all, iter=999, print.progress = TRUE) 
 
@@ -435,56 +381,80 @@ print("Shape (pc scores) not size corrected by vertebra type")
 summary(shape_vert_null) 
 sink() 
 
-###Sex ----
-##Test different shape between types of vertebrae ----
-shape_vert_sex_comb <- lm.rrpp(pcscores ~ vertebra + sex, data = gdf_all, iter=999, print.progress = TRUE) 
-shape_vert_sex_int <-  lm.rrpp(pcscores ~ vertebra * sex, data = gdf_all, iter=999, print.progress = TRUE) 
+###Vertebra type vs Sex ----
+
+#Use only males and females to avoid losing signal due to unknowns
+
+rm_U_all <- which(gdf_all$sex == "unknown")
+
+shape_vert_sex <-  lm.rrpp(gdf_all$pcscores[-c(rm_U_all),] ~  as.vector(gdf_all$vertebra[-rm_U_all]) * as.vector(gdf_all$sex[-rm_U_all]), iter=999, print.progress = TRUE) 
 
 #Main results of ANOVA analysis of shape with logCS
-summary(shape_vert_sex_comb)
-summary(shape_vert_sex_int) 
-
-#ANOVAs - is a model significantly better than the others?
-anova_shape_sex_models <- anova(shape_vert_null, shape_vert_sex_comb, shape_vert_sex_int)
-anova_shape_sex_models
+summary(shape_vert_sex) 
 
 #Save results of significant regression to file
-sink("shape_sex_models.txt")
-print("Combination +")
-summary(shape_vert_sex_comb) 
-
-print("Interaction *")
-summary(shape_vert_sex_int)
-
-print("ANOVA")
-anova_shape_sex_models
+sink("Output/shape_vertebra_sex_model.txt")
+print("Shape ~ vertebra * sex")
+summary(shape_vert_sex)
 sink() 
 
-###Age ----
-##Test different shape between types of vertebrae ----
-shape_vert_age_comb <- lm.rrpp(pcscores ~ vertebra + age, data = gdf_all, iter=999, print.progress = TRUE) 
-shape_vert_age_int <-  lm.rrpp(pcscores ~ vertebra * age, data = gdf_all, iter=999, print.progress = TRUE) 
+#Calculate null model without unknowns - changes in shape based on vertebra type
+shape_vert_null1 <- lm.rrpp(gdf_all$pcscores[-c(rm_U_all),] ~  as.vector(gdf_all$vertebra[-rm_U_all]), iter=999, print.progress = TRUE) 
+
+#Main results of ANOVA analysis null model
+summary(shape_vert_null1)
+
+#Pairwise comparison for the combination and interaction model
+#Helps determine if there is a significant difference in slope (int model) in the shape_sex trajectory on top of difference in intercept (comb model)
+pairwise_shape_sex_vert <- pairwise(shape_vert_sex, fit.null = shape_vert_null1,
+                                    groups = gdf_all$sex[-rm_U_all], print.progress = FALSE) 
+pairwise_shape_sex_vert
+
+#Distances between slope vectors (end-points) - absolute difference between slopes of groups
+#if significant means int model better than comb
+pairwise_shape_sex_vert_dist <- summary(pairwise_shape_sex_vert, confidence = 0.95, test.type = "dist") 
+pairwise_shape_sex_vert_dist
+
+#Correlation between slope vectors (and angles) - similarity of vector orientation or angle,
+#if significant means the vectors of the groups are oriented in different ways 
+pairwise_shape_sex_vert_VC <- summary(pairwise_shape_sex_vert, confidence = 0.95, test.type = "VC",
+                                      angle.type = "deg") 
+pairwise_shape_sex_vert_VC
+
+#Absolute difference between slope vector lengths - difference in rate of change per covariate unit (size),
+#if significant means there is a significant rate of change difference in shape between groups during growth
+pairwise_shape_sex_vert_DL <-summary(pairwise_shape_sex_vert, confidence = 0.95, test.type = "DL") 
+pairwise_shape_sex_vert_DL
+
+#Save results to file
+sink("Output/pairwise_shape_sex_vert.txt")
+print("1-Pairwise absolute distances slopes")
+summary(pairwise_shape_sex_vert, confidence = 0.95, test.type = "dist") 
+
+print("2-Distance between angles (slope directions)")
+summary(pairwise_shape_sex_vert, confidence = 0.95, test.type = "VC",
+        angle.type = "deg") 
+
+print("3-Difference in slope vector length (difference in rate of change of shape per unit of size)")
+summary(pairwise_shape_sex_vert, confidence = 0.95, test.type = "DL") 
+
+sink()
+
+###Vertebra type vs Age ----
+shape_vert_age <-  lm.rrpp(pcscores ~ vertebra * age, data = gdf_all, iter=999, print.progress = TRUE) 
 
 #Main results of ANOVA analysis of shape with logCS
-summary(shape_vert_age_comb)
-summary(shape_vert_age_int) 
+summary(shape_vert_age) 
 
 #Save results of significant regression to file
-sink("shape_age_models.txt")
-print("Combination +")
-summary(shape_vert_age_comb) 
-
-print("Interaction *")
-summary(shape_vert_age_int)
+sink("Output/shape_vertebra_age_model.txt")
+print("Shape ~ vertebra * age")
+summary(shape_vert_age)
 sink() 
-
-#ANOVAs - is a model significantly better than the others?
-anova_shape_age_models <- anova(shape_vert_null, shape_vert_age_comb, shape_vert_age_int)
-anova_shape_age_models
 
 #Pairwise comparison for the combination and interaction model
 #Helps determine if there is a significant difference in slope (int model) in the shape_age trajectory on top of difference in intercept (comb model)
-pairwise_shape_age_vert <- pairwise(shape_vert_age_int, fit.null = shape_vert_null,
+pairwise_shape_age_vert <- pairwise(shape_vert_age, fit.null = shape_vert_null,
                                     groups = gdf_all$age, print.progress = FALSE) 
 pairwise_shape_age_vert
 
@@ -505,10 +475,7 @@ pairwise_shape_age_vert_DL <-summary(pairwise_shape_age_vert, confidence = 0.95,
 pairwise_shape_age_vert_DL
 
 #Save results to file
-sink("pairwise_shape_age_vert.txt")
-print("ANOVA models")
-print(anova_shape_age_models)
-
+sink("Output/pairwise_shape_age_vert.txt")
 print("1-Pairwise absolute distances slopes")
 summary(pairwise_shape_age_vert, confidence = 0.95, test.type = "dist") 
 
@@ -521,37 +488,45 @@ summary(pairwise_shape_age_vert, confidence = 0.95, test.type = "DL")
 
 sink()
 
-###Sex vs Size ----
-##Test different size between types of vertebrae and sex ----
-size_vert_sex_null <- lm.rrpp(size ~ vertebra, data = gdf_all, iter=999, print.progress = TRUE) 
-size_vert_sex_comb <- lm.rrpp(size ~ vertebra + sex, data = gdf_all, iter=999, print.progress = TRUE) 
-size_vert_sex_int <-  lm.rrpp(size ~ vertebra * sex, data = gdf_all, iter=999, print.progress = TRUE) 
+##Size ----
+###Vertebra type ----
+#Calculate null model - changes in size based on vertebra type
+size_vert_null <- lm.rrpp(size ~ vertebra, data = gdf_all, iter=999, print.progress = TRUE) 
 
-#Main results of ANOVA analysis of shape with logCS
-summary(size_vert_sex_null)
-summary(size_vert_sex_comb)
-summary(size_vert_sex_int) 
+#Main results of ANOVA analysis null model
+summary(size_vert_null)
 
-#ANOVAs - is a model significantly better than the others?
-anova_size_sex_models <- anova(size_vert_sex_null, size_vert_sex_comb, size_vert_sex_int)
-anova_size_sex_models
-
-#Save results of significant regression to file
-sink("shape_sex_models.txt")
-print("Null")
-summary(size_vert_sex_null)
-
-print("Combination +")
-summary(size_vert_sex_comb) 
-
-print("Interaction *")
-summary(size_vert_sex_int)
+#Save results onto file
+sink("Output/size_vertebra_model.txt")
+print("Size differences by vertebra type")
+summary(size_vert_null) 
 sink() 
 
+###Vertebra type vs Sex ----
+
+#Use only males and females to avoid losing signal due to unknowns
+
+size_vert_sex <-  lm.rrpp(gdf_all$size[-rm_U_all] ~  as.vector(gdf_all$vertebra[-rm_U_all]) * as.vector(gdf_all$sex[-rm_U_all]), iter=999, print.progress = TRUE) 
+
+#Main results of ANOVA analysis of size with logCS
+summary(size_vert_sex) 
+
+#Save results of significant regression to file
+sink("Output/size_vertebra_sex_model.txt")
+print("size ~ vertebra * sex")
+summary(size_vert_sex)
+sink() 
+
+#Calculate null model without unknowns - changes in size based on vertebra type
+size_vert_null1 <- lm.rrpp(gdf_all$size[-rm_U_all] ~  as.vector(gdf_all$vertebra[-rm_U_all]), iter=999, print.progress = TRUE) 
+
+#Main results of ANOVA analysis null model
+summary(size_vert_null1)
+
 #Pairwise comparison for the combination and interaction model
-#Helps determine if there is a significant difference in slope (int model) in the size trajectory on top of difference in intercept (comb model)
-pairwise_size_sex_vert <- pairwise(size_vert_sex_int, fit.null = size_vert_sex_null,
-                                    groups = gdf_all$sex, print.progress = FALSE) 
+#Helps determine if there is a significant difference in slope (int model) in the size_sex trajectory on top of difference in intercept (comb model)
+pairwise_size_sex_vert <- pairwise(size_vert_sex, fit.null = size_vert_null1,
+                                    groups = gdf_all$sex[-rm_U_all], print.progress = FALSE) 
 pairwise_size_sex_vert
 
 #Distances between slope vectors (end-points) - absolute difference between slopes of groups
@@ -566,15 +541,12 @@ pairwise_size_sex_vert_VC <- summary(pairwise_size_sex_vert, confidence = 0.95, 
 pairwise_size_sex_vert_VC
 
 #Absolute difference between slope vector lengths - difference in rate of change per covariate unit (size),
-#if significant means there is a significant rate of change difference in shape between groups during growth
+#if significant means there is a significant rate of change difference in size between groups during growth
 pairwise_size_sex_vert_DL <-summary(pairwise_size_sex_vert, confidence = 0.95, test.type = "DL") 
 pairwise_size_sex_vert_DL
 
 #Save results to file
-sink("pairwise_size_sex_vert.txt")
-print("ANOVA models")
-print(anova_size_sex_models)
-
+sink("Output/pairwise_size_sex_vert.txt")
 print("1-Pairwise absolute distances slopes")
 summary(pairwise_size_sex_vert, confidence = 0.95, test.type = "dist") 
 
@@ -582,115 +554,56 @@ print("2-Distance between angles (slope directions)")
 summary(pairwise_size_sex_vert, confidence = 0.95, test.type = "VC",
         angle.type = "deg") 
 
-print("3-Difference in slope vector length (difference in rate of change of shape per unit of size)")
+print("3-Difference in slope vector length (difference in rate of change of size per unit of size)")
 summary(pairwise_size_sex_vert, confidence = 0.95, test.type = "DL") 
 
 sink()
 
-####NOT RUN#####
-##Consensus ----
-#Is there differences in consensus column shape between sexes and ages?
-#Taking into account the shape difference based on column position
-#Shape is expressed as pc scores
+###Vertebra type vs Age ----
+size_vert_age <-  lm.rrpp(size ~ vertebra * age, data = gdf_all, iter=999, print.progress = TRUE) 
 
-#Make unique row names
-rownames(gdf_consensus$pcscores) <- make.names(gdf_consensus$specimen, unique = TRUE)
-
-#Calculate null model - changes in shape based on vertebra type
-shape_all_vert_null <- lm.rrpp(pcscores ~ vertebra, data = gdf_consensus, iter=999, print.progress = TRUE) 
-
-#Main results of ANOVA analysis null model
-summary(shape_all_vert_null)
-
-#Save results onto file
-sink("Output/shape_all_specimen_model.txt")
-print("Shape (pc scores) not size corrected by vertebra type")
-summary(shape_all_vert_null) 
-sink() 
-
-###Sex ----
-##Test different shape between types of vertebrae ----
-shape_all_sex_comb <- lm.rrpp(pcscores ~ vertebra + sex, data = gdf_consensus, iter=999, print.progress = TRUE) 
-shape_all_sex_int <-  lm.rrpp(pcscores ~ vertebra * sex, data = gdf_consensus, iter=999, print.progress = TRUE) 
-
-#Main results of ANOVA analysis of shape with logCS
-summary(shape_all_sex_comb)
-summary(shape_all_sex_int) 
-
-#ANOVAs - is a model significantly better than the others?
-anova_shape_all_sex_models <- anova(shape_all_vert_null, shape_all_sex_comb, shape_all_sex_int)
-anova_shape_all_sex_models
+#Main results of ANOVA analysis of size with logCS
+summary(size_vert_age) 
 
 #Save results of significant regression to file
-sink("Output/shape_sex_models.txt")
-print("Combination +")
-summary(shape_all_sex_comb) 
-
-print("Interaction *")
-summary(shape_all_sex_int)
-
-print("ANOVA")
-anova_shape_all_sex_models
+sink("Output/size_vertebra_age_model.txt")
+print("size ~ vertebra * age")
+summary(size_vert_age)
 sink() 
-
-###Age ----
-##Test different shape between types of vertebrae ----
-shape_all_age_comb <- lm.rrpp(pcscores ~ vertebra + age, data = gdf_consensus, iter=999, print.progress = TRUE) 
-shape_all_age_int <-  lm.rrpp(pcscores ~ vertebra * age, data = gdf_consensus, iter=999, print.progress = TRUE) 
-
-#Main results of ANOVA analysis of shape with logCS
-summary(shape_all_age_comb)
-summary(shape_all_age_int) 
-
-#Save results of significant regression to file
-sink("Output/shape_age_models.txt")
-print("Combination +")
-summary(shape_all_age_comb) 
-
-print("Interaction *")
-summary(shape_all_age_int)
-sink() 
-
-#ANOVAs - is a model significantly better than the others?
-anova_shape_all_age_models <- anova(shape_all_vert_null, shape_all_age_comb, shape_all_age_int)
-anova_shape_all_age_models
 
 #Pairwise comparison for the combination and interaction model
-#Helps determine if there is a significant difference in slope (int model) in the shape_all_age trajectory on top of difference in intercept (comb model)
-pairwise_shape_all_age_vert <- pairwise(shape_all_age_int, fit.null = shape_all_vert_null,
-                                    groups = gdf_consensus$age, print.progress = FALSE) 
-pairwise_shape_all_age_vert
+#Helps determine if there is a significant difference in slope (int model) in the size_age trajectory on top of difference in intercept (comb model)
+pairwise_size_age_vert <- pairwise(size_vert_age, fit.null = size_vert_null,
+                                    groups = gdf_all$age, print.progress = FALSE) 
+pairwise_size_age_vert
 
 #Distances between slope vectors (end-points) - absolute difference between slopes of groups
 #if significant means int model better than comb
-pairwise_shape_all_age_vert_dist <- summary(pairwise_shape_all_age_vert, confidence = 0.95, test.type = "dist") 
-pairwise_shape_all_age_vert_dist
+pairwise_size_age_vert_dist <- summary(pairwise_size_age_vert, confidence = 0.95, test.type = "dist") 
+pairwise_size_age_vert_dist
 
 #Correlation between slope vectors (and angles) - similarity of vector orientation or angle,
 #if significant means the vectors of the groups are oriented in different ways 
-pairwise_shape_all_age_vert_VC <- summary(pairwise_shape_all_age_vert, confidence = 0.95, test.type = "VC",
+pairwise_size_age_vert_VC <- summary(pairwise_size_age_vert, confidence = 0.95, test.type = "VC",
                                       angle.type = "deg") 
-pairwise_shape_all_age_vert_VC
+pairwise_size_age_vert_VC
 
 #Absolute difference between slope vector lengths - difference in rate of change per covariate unit (size),
-#if significant means there is a significant rate of change difference in shape between groups during growth
-pairwise_shape_all_age_vert_DL <-summary(pairwise_shape_all_age_vert, confidence = 0.95, test.type = "DL") 
-pairwise_shape_all_age_vert_DL
+#if significant means there is a significant rate of change difference in size between groups during growth
+pairwise_size_age_vert_DL <-summary(pairwise_size_age_vert, confidence = 0.95, test.type = "DL") 
+pairwise_size_age_vert_DL
 
 #Save results to file
-sink("Output/pairwise_shape_all_age_vert.txt")
-print("ANOVA models")
-print(anova_shape_all_age_models)
-
+sink("Output/pairwise_size_age_vert.txt")
 print("1-Pairwise absolute distances slopes")
-summary(pairwise_shape_all_age_vert, confidence = 0.95, test.type = "dist") 
+summary(pairwise_size_age_vert, confidence = 0.95, test.type = "dist") 
 
 print("2-Distance between angles (slope directions)")
-summary(pairwise_shape_all_age_vert, confidence = 0.95, test.type = "VC",
+summary(pairwise_size_age_vert, confidence = 0.95, test.type = "VC",
         angle.type = "deg") 
 
-print("3-Difference in slope vector length (difference in rate of change of shape per unit of size)")
-summary(pairwise_shape_all_age_vert, confidence = 0.95, test.type = "DL") 
+print("3-Difference in slope vector length (difference in rate of change of size per unit of size)")
+summary(pairwise_size_age_vert, confidence = 0.95, test.type = "DL") 
 
 sink()
 
@@ -716,15 +629,16 @@ PC1_consensus <- pca_all[["result"]][["AVE"]][["AVE_X"]][[4]][["comp1"]]*100
 PC2_consensus <- pca_all[["result"]][["AVE"]][["AVE_X"]][[4]][["comp2"]]*100
 
 #Plot
-PCA_all_consensus_ggplot <- ggplot(pcscores_all_consensus, aes(x = comp1, y = comp2, colour = age, fill = age))+
-  geom_point(size = 3, aes(shape = vertebra))+
+PCA_all_consensus_ggplot <- ggplot(pcscores_all_consensus, aes(x = comp1, y = comp2, label = specimens, colour = age, fill = age))+
+  geom_point(size = 3, aes(shape = sex))+
+  geom_text_repel(colour = "black", size = 4, max.overlaps = 200)+
   scale_colour_manual(name = "Age", labels =  c("adult"  ,  "juvenile", "newborn" ), #to be ordered as they appear in tibble
-                      values = mypalette_age_sex , aesthetics = c("colour","fill"))+            #legend and color adjustments
-  scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
+                      values = mypalette_age , aesthetics = c("colour","fill"))+            #legend and color adjustments
+  scale_shape_manual(name = "Sex", labels = c( "F"   ,    "M"      , "unknown"), #copy from as.factor(sex)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (23.83%)")+ #copy this from PC1_consensus object
-  ylab("PC 2 (13.43%)")+ #copy this from PC2_consensus object
+  xlab(paste0("PC 1 (",round(PC1_consensus, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_consensus, digits = 2),"%)"))+ 
   ggtitle("PCA all data consensus")+
   theme(plot.title = element_text(face = "bold", hjust = 0.5)) 
 
@@ -737,53 +651,53 @@ hulls_all_age_consensus <- pcscores_all_consensus %>%
   slice(chull(comp1, comp2)) %>%
   rename(x = comp1, y = comp2)
 
-#Nice PCA plot with hulls around age
+
 PCA_all_consensus_age_ggplot <- ggplot(pcscores_all_consensus, aes(x = comp1, y = comp2, colour = age))+
-  geom_point(size = 3, aes(shape = vertebra), fill = "white")+
-  scale_colour_manual(name = "Age", labels =  c("adult" ,   "juvenile" ,"neonate" ), #to be ordered as they appear in tibble
-                      values = mypalette_age_sex)+            #legend and color adjustments
+  geom_point(size = 3, aes(shape = vertebra, fill = age), color = "black") +
   geom_polygon(data = hulls_all_age_consensus, aes(x = x, y = y, colour = age, fill = age), 
-               alpha = .3, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
-  scale_fill_manual(name = "Age", labels = c("adult"  ,  "juvenile", "neonate" ),
-                    values =  mypalette_age_sex )+ #must match scale_colour_manual
+               alpha = .3, show.legend = FALSE, inherit.aes = FALSE) +
+  scale_colour_manual(name = "Age", labels = c("Adult", "Juvenile", "Neonate"),
+                      values = mypalette_age) +
+  scale_fill_manual(name = "Age", labels = c("Adult", "Juvenile", "Neonate"),
+                    values = mypalette_age) +
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (23.83%)")+ #copy this from PC1_consensus object
-  ylab("PC 2 (13.43%)")+ #copy this from PC2_consensus object
- 
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
+  xlab(paste0("PC 1 (",round(PC1_consensus, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_consensus, digits = 2),"%)"))+ 
+  guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_age))) +
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+        legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis
 
 #Visualize plot and save as PDF using menu in bar on the right
 PCA_all_consensus_age_ggplot
 
+
 #Make hulls for PCA plot with hulls around sex
-hulls_all_sex_consensus <- pcscores_all_consensus %>%
+hulls_all_sex_consensus  <- pcscores_all_consensus  %>%
   group_by(sex) %>%
   slice(chull(comp1, comp2)) %>%
   rename(x = comp1, y = comp2)
 
 #Nice PCA plot with hulls around sex
-PCA_all_consensus_sex_ggplot <- ggplot(pcscores_all_consensus, aes(x = comp1, y = comp2, colour = sex))+
-  geom_point(size = 3, aes(shape = vertebra), fill = "white")+
-  scale_colour_manual(name = "Sex", labels =  c("F" ,   "M" ,"unknown" ), #to be ordered as they appear in tibble
-                      values = mypalette_age_sex)+            #legend and color adjustments
-  geom_polygon(data = hulls_all_sex_consensus, aes(x = x, y = y, colour = sex, fill = sex), 
+PCA_all_consensus_sex_ggplot <- ggplot(pcscores_all_consensus[!pcscores_all_consensus$sex%in% c("unknown"),], aes(x = comp1, y = comp2, colour = sex))+
+  geom_point(size = 3, aes(shape = vertebra, fill = sex), color = "black") +
+  geom_polygon(data = hulls_all_sex_consensus[!hulls_all_sex_consensus$sex%in% c("unknown"),], aes(x = x, y = y, colour = sex, fill = sex), 
                alpha = .3, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
-  scale_fill_manual(name = "Sex", labels =  c("F" ,   "M" ,"unknown" ),
-                    values =  mypalette_age_sex )+ #must match scale_colour_manual
+  scale_colour_manual(name = "Sex", labels =  c("Female"   ,    "Male"), #to be ordered as they appear in tibble
+                      values= mypalette_sex)+            #legend and color adjustments
+  scale_fill_manual(name = "Sex", labels = c( "Female"   ,    "Male"),
+                    values =   mypalette_sex)+ #must match scale_colour_manual
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (23.83%)")+ #copy this from PC1_consensus object
-  ylab("PC 2 (13.43%)")+ #copy this from PC2_consensus object
-  ggtitle("PCA all data consensus")+
-  theme(plot.title = element_text(face = "bold", hjust = 0.5))+
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
+  xlab(paste0("PC 1 (",round(PC1_consensus, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_consensus, digits = 2),"%)"))+ 
+  guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_sex))) +
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+        legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis
 
@@ -796,71 +710,25 @@ hulls_all_vertebra_consensus  <- pcscores_all_consensus  %>%
   slice(chull(comp1, comp2)) %>%
   rename(x = comp1, y = comp2)
 
-#Nice PCA plot with hulls around sex
+#Nice PCA plot with hulls around vertebra
 PCA_all_consensus_vertebra_ggplot <- ggplot(pcscores_all_consensus, aes(x = comp1, y = comp2, colour = vertebra))+
-  geom_point(size = 3, aes(shape = age), fill = "white")+
-  scale_colour_manual(name = "Vertebra", labels =  c("Thoracic","Lumbar", "Caudal"), #to be ordered as they appear in tibble
-                      values = mypalette_age_sex )+            #legend and color adjustments
+  geom_point(size = 3, aes(shape = age, fill = vertebra), color = "black")+
   geom_polygon(data = hulls_all_vertebra_consensus, aes(x = x, y = y, colour = vertebra, fill = vertebra), 
                alpha = .3, show.legend = FALSE, inherit.aes = F)+ #colored hulls with transparency
   scale_fill_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"),
-                    values =  mypalette_age_sex)+ #must match scale_colour_manual
-  scale_shape_manual(name = "Age", labels = c( "adult"  ,  "juvenile", "newborn"), #copy from as.factor(age)
+                    values =  mypalette_vertebrae)+ #must match scale_colour_manual
+  scale_colour_manual(name = "Vertebra", labels =  c("Thoracic","Lumbar", "Caudal"), #to be ordered as they appear in tibble
+                      values = mypalette_vertebrae)+            #legend and color adjustments
+  scale_shape_manual(name = "Age", labels = c( "Adult"  ,  "Juvenile", "Newborn"), #copy from as.factor(age)
                      values = shapes)+
   theme_bw()+
-  xlab("PC 1 (23.83%)")+ #copy this from PC1_consensus object
-  ylab("PC 2 (13.43%)")+ #copy this from PC2_consensus object
-  ggtitle("PCA all data consensus")+
-  theme(plot.title = element_text(face = "bold", hjust = 0.5))+
-  #Remove legend for a scale_ using guide
-  guides(fill = guide_legend(label = F, title = NULL, override.aes = list(shape = NA)))
+  xlab(paste0("PC 1 (",round(PC1_consensus, digits = 2),"%)"))+ 
+  ylab(paste0("PC 2 (",round(PC2_consensus, digits = 2),"%)"))+ 
+  guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_vertebrae))) +
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+        legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis
 
 #Visualize plot and save as PDF using menu in bar on the right
 PCA_all_consensus_vertebra_ggplot
-
-#GRAPHICS CODE ----
-##Create project palettes----
-mypalette_paired <- brewer.pal(12,"Paired")
-image(1:12, 1, as.matrix(1:12), col = mypalette_paired, xlab = "Paired",
-      ylab = "", yaxt = "n")
-
-mypalette_blue <- as.matrix(ggthemes_data[["tableau"]][["color-palettes"]][["ordered-sequential"]][["Blue"]][["value"]])
-image(1:20, 1, as.matrix(1:20), col = mypalette_blue, xlab = "Blue",
-      ylab = "", yaxt = "n")
-
-install.packages("rcartocolor")
-library(rcartocolor)
-display_carto_all(colorblind_friendly = TRUE)
-display_carto_pal(12, "Safe")
-
-
-#Palette for vertebrae
-mypalette_avertebrae <- c(mypalette_paired[3], mypalette_paired[8], mypalette_paired[9])
-image(1:3, 1, as.matrix(1:3), col = mypalette_age_sex,
-      ylab = "", yaxt = "n")
-
-#Palette for age - early, late/new, immature, adult
-mypalette_age<- c(mypalette_paired[12], mypalette_paired[11], mypalette_paired[9])
-image(1:3, 1, as.matrix(1:3), col = mypalette_age_sex,
-      ylab = "", yaxt = "n")
-
-#Palette to use for sex PCAs
-mypalette_sex <- c(mypalette_paired[5], mypalette_paired[2], mypalette_paired[10])
-image(1:3, 1, as.matrix(1:3), col = mypalette_age_sex,
-      ylab = "", yaxt = "n")
-
-#create shape palette for sex
-shapes <- c(19, 15, 17)
-
-#Create shape palette 3 age
-shapes <- c(21, 22, 24) 
-
-
-#Palette for vertebrae - thoracic, lumbar, caudal, consensus
-mypalette_specimen <- c(mypalette_blue[3,], mypalette_blue[7,], mypalette_blue[12,], mypalette_blue[20,])
-image(1:4, 1, as.matrix(1:4), col = mypalette_specimen,
-      ylab = "", yaxt = "n")
-
-shapes2 <- c(21, 22, 23, 24)
