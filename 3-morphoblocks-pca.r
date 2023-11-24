@@ -241,6 +241,110 @@ PCA_all_vertebrae_vertebra_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp
 #Visualize plot and save as PDF using menu in bar on the right
 PCA_all_vertebrae_vertebra_ggplot
 
+####Predict shapes based on each vertebra scores ----
+#PC1
+pcs_thoracic_1 <- pca_all[["scores"]][[1]][,1]
+pcs_lumbar_1 <- pca_all[["scores"]][[2]][,1]
+pcs_caudal_1 <- pca_all[["scores"]][[3]][,1]
+
+preds_thoracic_1 <- shape.predictor(block_thoracic@gpa.3D, x= pcs_thoracic_1, Intercept = FALSE, 
+                                   pred_min = min(pcs_thoracic_1), pred_max = max(pcs_thoracic_1))
+preds_lumbar_1 <- shape.predictor(block_lumbar@gpa.3D, x= pcs_lumbar_1, Intercept = FALSE, 
+                                    pred_min = min(pcs_lumbar_1), pred_max = max(pcs_lumbar_1))
+preds_caudal_1 <- shape.predictor(block_caudal@gpa.3D, x= pcs_caudal_1, Intercept = FALSE, 
+                                    pred_min = min(pcs_caudal_1), pred_max = max(pcs_caudal_1))
+
+#3D deformation using PLY files
+#Extremes PC axes
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC1min_morphoblocks_thoracic_mesh <- warpRefMesh(mesh = refmesh_thoracic, mesh.coord = warp_specimen_thoracic, 
+                                      ref = preds_thoracic_1$pred_min, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC1min_morphoblocks_thoracic_mesh, filename = "Output/PC1min_morphoblocks_thoracic")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC1max_morphoblocks_thoracic_mesh <- warpRefMesh(mesh = refmesh_thoracic, mesh.coord = warp_specimen_thoracic, 
+                                      ref = preds_thoracic_1$pred_max, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC1max_morphoblocks_thoracic_mesh, filename = "Output/PC1max_morphoblocks_thoracic")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC1min_morphoblocks_lumbar_mesh <- warpRefMesh(mesh = refmesh_lumbar, mesh.coord = warp_specimen_lumbar, 
+                                                 ref = preds_lumbar_1$pred_min, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC1min_morphoblocks_lumbar_mesh, filename = "Output/PC1min_morphoblocks_lumbar")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC1max_morphoblocks_lumbar_mesh <- warpRefMesh(mesh = refmesh_lumbar, mesh.coord = warp_specimen_lumbar, 
+                                                 ref = preds_lumbar_1$pred_max, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC1max_morphoblocks_lumbar_mesh, filename = "Output/PC1max_morphoblocks_lumbar")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC1min_morphoblocks_caudal_mesh <- warpRefMesh(mesh = refmesh_caudal, mesh.coord = warp_specimen_caudal, 
+                                                 ref = preds_caudal_1$pred_min, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC1min_morphoblocks_caudal_mesh, filename = "Output/PC1min_morphoblocks_caudal")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC1max_morphoblocks_caudal_mesh <- warpRefMesh(mesh = refmesh_caudal, mesh.coord = warp_specimen_caudal, 
+                                                 ref = preds_caudal_1$pred_max, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC1max_morphoblocks_caudal_mesh, filename = "Output/PC1max_morphoblocks_caudal")
+
+#PC2
+pcs_thoracic_2 <- pca_all[["scores"]][[1]][,2]
+pcs_lumbar_2 <- pca_all[["scores"]][[2]][,2]
+pcs_caudal_2 <- pca_all[["scores"]][[3]][,2]
+
+preds_thoracic_2 <- shape.predictor(block_thoracic@gpa.3D, x= pcs_thoracic_2, Intercept = FALSE, 
+                                    pred_min = min(pcs_thoracic_2), pred_max = max(pcs_thoracic_2))
+preds_lumbar_2 <- shape.predictor(block_lumbar@gpa.3D, x= pcs_lumbar_2, Intercept = FALSE, 
+                                  pred_min = min(pcs_lumbar_2), pred_max = max(pcs_lumbar_2))
+preds_caudal_2 <- shape.predictor(block_caudal@gpa.3D, x= pcs_caudal_2, Intercept = FALSE, 
+                                  pred_min = min(pcs_caudal_2), pred_max = max(pcs_caudal_2))
+
+#3D deformation using PLY files
+#Extremes PC axes
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC2min_morphoblocks_thoracic_mesh <- warpRefMesh(mesh = refmesh_thoracic, mesh.coord = warp_specimen_thoracic, 
+                                                 ref = preds_thoracic_2$pred_min, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC2min_morphoblocks_thoracic_mesh, filename = "Output/PC2min_morphoblocks_thoracic")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC2max_morphoblocks_thoracic_mesh <- warpRefMesh(mesh = refmesh_thoracic, mesh.coord = warp_specimen_thoracic, 
+                                                 ref = preds_thoracic_2$pred_max, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC2max_morphoblocks_thoracic_mesh, filename = "Output/PC2max_morphoblocks_thoracic")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC2min_morphoblocks_lumbar_mesh <- warpRefMesh(mesh = refmesh_lumbar, mesh.coord = warp_specimen_lumbar, 
+                                               ref = preds_lumbar_2$pred_min, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC2min_morphoblocks_lumbar_mesh, filename = "Output/PC2min_morphoblocks_lumbar")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC2max_morphoblocks_lumbar_mesh <- warpRefMesh(mesh = refmesh_lumbar, mesh.coord = warp_specimen_lumbar, 
+                                               ref = preds_lumbar_2$pred_max, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC2max_morphoblocks_lumbar_mesh, filename = "Output/PC2max_morphoblocks_lumbar")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC2min_morphoblocks_caudal_mesh <- warpRefMesh(mesh = refmesh_caudal, mesh.coord = warp_specimen_caudal, 
+                                               ref = preds_caudal_2$pred_min, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC2min_morphoblocks_caudal_mesh, filename = "Output/PC2min_morphoblocks_caudal")
+
+##Create warp mesh, to use as reference for visualization of analyses
+PC2max_morphoblocks_caudal_mesh <- warpRefMesh(mesh = refmesh_caudal, mesh.coord = warp_specimen_caudal, 
+                                               ref = preds_caudal_2$pred_max, color = "gray", centered = FALSE)
+##Save warped mesh as ply (Morpho)
+mesh2ply(PC2max_morphoblocks_caudal_mesh, filename = "Output/PC2max_morphoblocks_caudal")
+
+
 ###Regression PC1 and PC2 ----
 
 #Calculate regression for each component for size
