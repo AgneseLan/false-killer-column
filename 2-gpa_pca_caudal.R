@@ -678,7 +678,7 @@ trajectory_caudal_age_ggplot <- ggplot(trajectory_caudal_age_pcscores, aes(x = P
   scale_shape_manual(name = "Age", labels = c("Adult"  ,  "Juvenile", "Neonate"), #copy from as.factor(genera)
                      values = shapes)+
   theme_bw()+
-  xlab(paste0("PC 1 (",round(as.numeric(trajectory_caudal_age[["pca"]][["sdev"]][1]^2/sum(trajectory_caudal_age[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+ #copy this from standard trajectory plot
+  xlab(paste0("PC 1 (",round(as.numeric(trajectory_caudal_age[["pca"]][["sdev"]][1]^2/sum(trajectory_caudal_age[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+ 
   ylab(paste0("PC 2 (",round(as.numeric(trajectory_caudal_age[["pca"]][["sdev"]][2]^2/sum(trajectory_caudal_age[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+
   theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
         legend.background = element_blank(), legend.box.background =  element_blank())+

@@ -131,7 +131,7 @@ PC2_all <- mean(pca_all[["result"]][["AVE"]][["AVE_X"]][[1]][["comp2"]], pca_all
 PCA_all_vertebrae_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp1, y = comp2, label = specimens, colour = age, fill = age))+
   geom_point(size = 3, aes(shape = sex))+
   geom_text_repel(colour = "black", size = 4, max.overlaps = 200)+
-  scale_colour_manual(name = "Age", labels =  c("adult"  ,  "juvenile", "newborn" ), #to be ordered as they appear in tibble
+  scale_colour_manual(name = "Age", labels =  c("adult"  ,  "juvenile", "Neonate" ), #to be ordered as they appear in tibble
                       values = mypalette_age , aesthetics = c("colour","fill"))+            #legend and color adjustments
   scale_shape_manual(name = "Sex", labels = c( "F"   ,    "M"      , "unknown"), #copy from as.factor(sex)
                      values = shapes)+
@@ -227,7 +227,7 @@ PCA_all_vertebrae_vertebra_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp
                     values =  mypalette_vertebrae)+ #must match scale_colour_manual
   scale_colour_manual(name = "Vertebra", labels =  c("Thoracic","Lumbar", "Caudal"), #to be ordered as they appear in tibble
                       values = mypalette_vertebrae)+            #legend and color adjustments
-  scale_shape_manual(name = "Age", labels = c( "Adult"  ,  "Juvenile", "Newborn"), #copy from as.factor(age)
+  scale_shape_manual(name = "Age", labels = c( "Adult"  ,  "Juvenile", "Neonate"), #copy from as.factor(age)
                      values = shapes)+
   theme_bw()+
   xlab(paste0("PC 1 (",round(PC1_all, digits = 2),"%)"))+ 
@@ -632,7 +632,7 @@ PC2_consensus <- pca_all[["result"]][["AVE"]][["AVE_X"]][[4]][["comp2"]]*100
 PCA_all_consensus_ggplot <- ggplot(pcscores_all_consensus, aes(x = comp1, y = comp2, label = specimens, colour = age, fill = age))+
   geom_point(size = 3, aes(shape = sex))+
   geom_text_repel(colour = "black", size = 4, max.overlaps = 200)+
-  scale_colour_manual(name = "Age", labels =  c("adult"  ,  "juvenile", "newborn" ), #to be ordered as they appear in tibble
+  scale_colour_manual(name = "Age", labels =  c("adult"  ,  "juvenile", "Neonate" ), #to be ordered as they appear in tibble
                       values = mypalette_age , aesthetics = c("colour","fill"))+            #legend and color adjustments
   scale_shape_manual(name = "Sex", labels = c( "F"   ,    "M"      , "unknown"), #copy from as.factor(sex)
                      values = shapes)+
@@ -719,7 +719,7 @@ PCA_all_consensus_vertebra_ggplot <- ggplot(pcscores_all_consensus, aes(x = comp
                     values =  mypalette_vertebrae)+ #must match scale_colour_manual
   scale_colour_manual(name = "Vertebra", labels =  c("Thoracic","Lumbar", "Caudal"), #to be ordered as they appear in tibble
                       values = mypalette_vertebrae)+            #legend and color adjustments
-  scale_shape_manual(name = "Age", labels = c( "Adult"  ,  "Juvenile", "Newborn"), #copy from as.factor(age)
+  scale_shape_manual(name = "Age", labels = c( "Adult"  ,  "Juvenile", "Neonate"), #copy from as.factor(age)
                      values = shapes)+
   theme_bw()+
   xlab(paste0("PC 1 (",round(PC1_consensus, digits = 2),"%)"))+ 
