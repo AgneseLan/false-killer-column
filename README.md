@@ -44,7 +44,7 @@ Before running analyses, save Data folder in the same directory as the R project
 This project is licensed under the MIT License - see the LICENSE.md file for details
 
 ## Session Info 📋
-For reproducibility purposes, here is the output of utils::sessionInfo() used to perform the analyses in the publication.
+For reproducibility purposes, here is the output of sessioninfo::session_info() used to perform the analyses in the publication.
 
 ```
 ─ Session info ───────────────────────────────────────────────────────────────────────────────────────────────────────────
