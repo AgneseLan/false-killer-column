@@ -1,0 +1,13 @@
+curves,lm1 ,lm2 ,ptswanted,bone,side
+1,1,5,9,centra,R
+2,3,4,7,process,R
+3,4,12,4,process,R
+4,12,11,5,process,R
+5,6,7,10,process,R
+6,7,8,5,process,M
+7,8,9,3,process,M
+8,9,10,6,process,M
+9,10,11,8,process,R
+10,11,13,8,process,R
+11,14,16,6,centra,R
+12,16,1,9,centra,M
