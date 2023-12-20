@@ -35,7 +35,7 @@ As described above. Meshes used to collect and test landmarks available followin
 
 ⌨ Code for analyses - .R files
 
-*1-import_caudal.R, 1-import_lumbar.R, 1-import_thoracic.R, 1-slider3d_2.r, 2-morphoblocks-gpa_pca_caudal.R, 2-morphoblocks-gpa_pca_lumbar.R, 2-morphoblocks-gpa_pca_thoracic.R, 3-morphoblocks-pca.r, 4-morphoblocks-allometry.r, 5-morphoblocks-phenotypic_trajectory.R*
+*1-import_caudal.R, 1-import_lumbar.R, 1-import_thoracic.R, 1-slider3d_2.r, 2-gpa_pca_caudal.R, 2-gpa_pca_lumbar.R, 2-gpa_pca_thoracic.R, 3-morphoblocks-pca.r, 4-morphoblocks-allometry.r, 5-morphoblocks-phenotypic_trajectory.R*
 
 Code files are numbered providing the order the analyses need to be performed in.
 Before running analyses, save Data folder in the same directory as the R project. This will allow to import the data as detailed in the code provided.
