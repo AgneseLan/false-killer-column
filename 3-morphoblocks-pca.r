@@ -161,11 +161,11 @@ PCA_all_vertebrae_age_ggplot <- ggplot(pcscores_all_vertebrae, aes(x = comp1, y 
                     values = mypalette_age) +
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
                      values = shapes)+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab(paste0("PC 1 (",round(PC1_all, digits = 2),"%)"))+ 
   ylab(paste0("PC 2 (",round(PC2_all, digits = 2),"%)"))+ 
   guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_age))) +
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 15, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis
@@ -191,11 +191,11 @@ PCA_all_vertebrae_sex_ggplot <- ggplot(pcscores_all_vertebrae[!pcscores_all_vert
                     values =   mypalette_sex)+ #must match scale_colour_manual
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic","Lumbar", "Caudal"), #copy from as.factor(sex)
                      values = shapes)+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab(paste0("PC 1 (",round(PC1_all, digits = 2),"%)"))+ 
   ylab(paste0("PC 2 (",round(PC2_all, digits = 2),"%)"))+ 
   guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_sex))) +
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 15, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())
 
 #scale_y_reverse() #reverse y scale to match traj analysis

@@ -133,10 +133,10 @@ allometry_vert_ggplot <- ggplot(allometry_vert_plot, aes(x = logCS, y = RegScore
                      values = shapes)+
   scale_linetype_manual(name = "Vertebra", labels = c( "Thoracic","Lumbar", "Caudal"),
                         values = c(1,2,3))+
-  theme_classic(base_size = 12)+
+  theme_classic(base_size = 14)+
   xlab("Size (logCS)")+
   ylab("Regression Score")+
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 15, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())+
   guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_vertebrae, alpha =1)),
          shape = guide_legend(override.aes = list(colour = "black", fill = "gray50", alpha =1)))

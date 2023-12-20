@@ -106,10 +106,10 @@ trajectory_column_age_ggplot <- ggplot(trajectory_column_age_pcscores, aes(x = P
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic", "Lumbar", "Caudal"), values = shapes)+
   scale_colour_manual(name = "Age", labels = c("Adult"  ,  "Juvenile", "Neonate"), #copy from as.factor(genera)
                       values = mypalette_age, aesthetics = c("colour", "fill"))+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab(paste0("PC 1 (",round(as.numeric(trajectory_column_age[["pca"]][["sdev"]][1]^2/sum(trajectory_column_age[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+ 
   ylab(paste0("PC 2 (",round(as.numeric(trajectory_column_age[["pca"]][["sdev"]][2]^2/sum(trajectory_column_age[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 15, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())+
   guides(shapes = guide_legend(override.aes = list(colour = "black", fill = "darkgray", alpha = 1)),
     color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_age)))
@@ -211,10 +211,10 @@ trajectory_column_sex_ggplot2 <- ggplot(trajectory_column_sex_pcscores[!trajecto
   scale_shape_manual(name = "Vertebra", labels = c("Thoracic", "Lumbar", "Caudal"), values = shapes)+
   scale_colour_manual(name = "Sex", labels = c("Females"  ,  "Males"), #copy from as.factor(genera)
                       values = mypalette_sex, aesthetics = c("colour", "fill"))+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab(paste0("PC 1 (",round(as.numeric(trajectory_column_sex[["pca"]][["sdev"]][1]^2/sum(trajectory_column_sex[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+ 
   ylab(paste0("PC 2 (",round(as.numeric(trajectory_column_sex[["pca"]][["sdev"]][2]^2/sum(trajectory_column_sex[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 15, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())+
   guides(shapes = guide_legend(override.aes = list(colour = "black", fill = "darkgray", alpha = 1)),
          color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_sex)))

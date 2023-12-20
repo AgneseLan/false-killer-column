@@ -247,7 +247,7 @@ PCA_all_lumbar_ggplot <- ggplot(pcscores_all_lumbar, aes(x = Comp1, y = Comp2, l
                     values = mypalette_age)+            #legend and color adjustments
   scale_shape_manual(name = "Sex", labels = c( "F"   ,    "M"      , "unknown"), #copy from as.factor(sex)
                      values = shapes)+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab(paste0("PC 1 (",round(as.numeric(PCA_all_lumbar$sdev[1]^2/sum(PCA_all_lumbar$sdev^2)*100), digits = 2),"%)"))+ 
   ylab(paste0("PC 2 (",round(as.numeric(PCA_all_lumbar$sdev[2]^2/sum(PCA_all_lumbar$sdev^2)*100), digits = 2),"%)"))+
   ggtitle("PCA all data lumbar")+
@@ -274,11 +274,11 @@ PCA_all_lumbar_age_ggplot <- ggplot(pcscores_all_lumbar, aes(x = Comp1, y = Comp
                     values = mypalette_age) +
   scale_shape_manual(name = "Sex", labels = c("Female", "Male", "Neonate"),
                      values = shapes) +
-  theme_bw() +
+  theme_bw(base_size = 14) +
   xlab(paste0("PC 1 (", round(as.numeric(PCA_all_lumbar$sdev[1]^2/sum(PCA_all_lumbar$sdev^2)*100), digits = 2), "%)")) +
   ylab(paste0("PC 2 (", round(as.numeric(PCA_all_lumbar$sdev[2]^2/sum(PCA_all_lumbar$sdev^2)*100), digits = 2), "%)")) +
   guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_age))) +
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())+
   annotate("text", x = 0.13, y = -0.2, label = "Lumbar",  fontface = 3, size = 12)
 
@@ -304,11 +304,11 @@ PCA_all_lumbar_sex_ggplot <- ggplot(pcscores_all_lumbar[!pcscores_all_lumbar$sex
                     values =   mypalette_sex)+ #must match scale_colour_manual
   scale_shape_manual(name = "Age", labels = c( "Adult"  ,  "Juvenile", "Neonate"), #copy from as.factor(sex)
                      values = shapes)+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab(paste0("PC 1 (",round(as.numeric(PCA_all_lumbar$sdev[1]^2/sum(PCA_all_lumbar$sdev^2)*100), digits = 2),"%)"))+ #copy this from standard PCA plot (PCA_all_plot)
   ylab(paste0("PC 2 (",round(as.numeric(PCA_all_lumbar$sdev[2]^2/sum(PCA_all_lumbar$sdev^2)*100), digits = 2),"%)"))+
   guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_sex))) +
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())+
   annotate("text", x = 0.13, y = -0.2, label = "Lumbar",  fontface = 3, size = 12)
 
@@ -675,10 +675,10 @@ trajectory_lumbar_age_ggplot <- ggplot(trajectory_lumbar_age_pcscores, aes(x = P
   scale_colour_manual(name = "Sex", labels = c("Female", "Male"), values = mypalette_sex, aesthetics = c("colour", "fill"))+
   scale_shape_manual(name = "Age", labels = c("Adult"  ,  "Juvenile", "Neonate"), #copy from as.factor(genera)
                      values = shapes)+
-  theme_bw()+
+  theme_bw(base_size = 14)+
   xlab(paste0("PC 1 (",round(as.numeric(trajectory_lumbar_age[["pca"]][["sdev"]][1]^2/sum(trajectory_lumbar_age[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+ #copy this from standard trajectory plot
   ylab(paste0("PC 2 (",round(as.numeric(trajectory_lumbar_age[["pca"]][["sdev"]][2]^2/sum(trajectory_lumbar_age[["pca"]][["sdev"]]^2)*100), digits = 2),"%)"))+
-  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 11),
+  theme(legend.key = element_blank(), legend.title = element_text(size = 12, face = "bold"), legend.text = element_text(size = 14),
         legend.background = element_blank(), legend.box.background =  element_blank())+
   guides(color = guide_legend(override.aes = list(shape = 23, colour = "black", fill = mypalette_sex)))+
   annotate("text", x = 0.15, y = -0.095, label = "Lumbar",  fontface = 3, size = 12)
