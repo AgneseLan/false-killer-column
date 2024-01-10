@@ -15,7 +15,7 @@ To cite this repo:
 
 ## Data :floppy_disk: 
 
-The data are provided in the Data folder. Mesh files (PLY) needed to test postioning when importing landmarks are available at following the provided OneDrive link.
+The data are provided in the Data folder. Mesh files (PLY) needed to test postioning when importing landmarks are available at following the provided Zenodo link.
 
 - __Landmark data__: *pts folder* <br />
 Text files with landmark coordinates for each specimen in PTS format. Unzip folder first.
@@ -31,7 +31,7 @@ In this repository you will find raw data (.csv and data files) and code for ana
 
 📁 Data
 
-As described above. Meshes used to collect and test landmarks available following provided OneDrive link. 
+As described above. Meshes used to collect and test landmarks available following provided Zenodo link. 
 
 ⌨ Code for analyses - .R files
 
