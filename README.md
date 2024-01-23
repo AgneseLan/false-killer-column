@@ -24,7 +24,7 @@ Text files with landmark coordinates for each specimen in PTS format. Unzip fold
 Empty folder where mesh files from Zenodo need to be saved to reproduce the code. Folder contains txt file with the Zenodo link.
 
 - __Specimens' classifiers, landmark/curves lists__: *curves_caudal.csv, curves_lumbar.csv, curves_thoracic.csv, info_caudal.csv, info_lumbar.csv, info_thoracic.csv, landmark_caudal.csv, landmark_lumbar.csv, landmark_thoracic.csv* <br />
-Spreadsheets with additional inforation for analyses: list of curves for each vertebra type, list of landmarks for each vertebra type, classifiers for specimens (vertebra number, vertebra ID, specimen number,	sex,	size (total length, cm),	age) for each vertebra type.
+Spreadsheets with additional information for analyses: list of curves for each vertebra type, list of landmarks for each vertebra type, classifiers for specimens (vertebra number, vertebra ID, specimen number,	sex,	size (total length, cm),	age) for each vertebra type.
 
 ## Analysis :computer:
 In this repository you will find raw data (.csv and data files) and code for analyses (code supplied as .R files)
