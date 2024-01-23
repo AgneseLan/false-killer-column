@@ -15,13 +15,13 @@ To cite this repo:
 
 ## Data :floppy_disk: 
 
-The data are provided in the Data folder. Mesh files (PLY) needed to test postioning when importing landmarks are available at following the provided Zenodo link.
+The data are provided in the Data folder. Mesh files (PLY) needed to test postioning when importing landmarks are available at the provided Zenodo link.
 
 - __Landmark data__: *pts folder* <br />
 Text files with landmark coordinates for each specimen in PTS format. Unzip folder first.
 
 - __Surface data__: *ply folder* <br />
-Empty folder where mesh files from OneDrive need to be saved to reproduce the code. Unzip folder first.
+Empty folder where mesh files from Zenodo need to be saved to reproduce the code. Folder contains txt file with the Zenodo link.
 
 - __Specimens' classifiers, landmark/curves lists__: *curves_caudal.csv, curves_lumbar.csv, curves_thoracic.csv, info_caudal.csv, info_lumbar.csv, info_thoracic.csv, landmark_caudal.csv, landmark_lumbar.csv, landmark_thoracic.csv* <br />
 Spreadsheets with additional inforation for analyses: list of curves for each vertebra type, list of landmarks for each vertebra type, classifiers for specimens (vertebra number, vertebra ID, specimen number,	sex,	size (total length, cm),	age) for each vertebra type.
@@ -31,7 +31,7 @@ In this repository you will find raw data (.csv and data files) and code for ana
 
 📁 Data
 
-As described above. Meshes used to collect and test landmarks available following provided Zenodo link. 
+As described above. Meshes used to collect and test landmarks available following the provided Zenodo link. 
 
 ⌨ Code for analyses - .R files
 
