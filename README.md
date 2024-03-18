@@ -10,7 +10,7 @@ Available at: https://github.com/AgneseLan/false-killer-column
 
 If using any of this code or data please cite the paper above and this repo
 
-To cite this repo: 
+To cite this repo: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10829622.svg)](https://doi.org/10.5281/zenodo.10829622)
 
 
 ## Data :floppy_disk: 
